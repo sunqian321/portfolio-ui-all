@@ -1,0 +1,9 @@
+*.DS_Store
+.DS_Store
+
+# 源 PNG 不放在仓库里（在 作品集/投递/单独项目/ui全项目（驾-可视化-原型（ai-app）/），
+# 五张加起来上百 MB），所以不用在这里屏蔽
+
+# 百度网盘同步的残留文件，不是本项目的东西
+*.baiduyun.uploading.cfg
+*.baiduyun.p.downloading

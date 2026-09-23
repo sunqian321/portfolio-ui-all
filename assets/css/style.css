@@ -1,0 +1,357 @@
+/* ============================================================
+   孙茜 · 作品集 —— 网页版样式
+   配色取自设计稿：主色 #723FFF，深底 #131313，纸白 #FFFFFF
+   ============================================================ */
+
+:root{
+  --violet:#723FFF;
+  --violet-hi:#8455FF;
+  --ink:#131313;
+  --paper:#fff;
+
+  --nav-h:60px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+
+  --font:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC",
+         "Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+
+html{
+  /* 刻意不写 scroll-behavior:smooth。本版全页约 5.5 万像素高，CSS 平滑滚动
+     会让一次从目录到「联系我」的跳转变成半分钟的动画、沿途把整站图片都
+     下载解码一遍，弱显卡机器上就是一路卡过去。
+     改由 main.js 判断距离：近的平滑滚，跨屏的直接瞬移。 */
+  scroll-padding-top:var(--nav-h);
+  -webkit-text-size-adjust:100%;
+}
+
+body{
+  margin:0;
+  background:var(--ink);
+  color:#fff;
+  font-family:var(--font);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+img{max-width:100%}
+
+a{color:inherit}
+
+/* ── 顶部滚动进度条 ─────────────────────────────────────── */
+.progress{
+  position:fixed;top:0;left:0;height:3px;width:100%;
+  /* 用 scaleX 而不是 width：width 每帧都要重新布局 + 重绘，
+     scaleX 只是合成层里的一次变换，交给显卡做，不占主线程。 */
+  transform:scaleX(0);transform-origin:0 50%;
+  background:linear-gradient(90deg,var(--violet),#B18CFF);
+  z-index:60;
+  will-change:transform;
+}
+
+/* ── 顶部导航 ───────────────────────────────────────────── */
+.nav{
+  position:fixed;top:0;left:0;right:0;height:var(--nav-h);
+  display:flex;align-items:center;gap:18px;
+  padding:0 clamp(14px,3vw,34px);
+  z-index:50;
+  /* 顶部时完全透明，免得压住封面自带的窗口栏；滚动后才浮出毛玻璃底 */
+  background:transparent;
+  border-bottom:1px solid transparent;
+  transition:transform .32s var(--ease),background .3s,border-color .3s;
+}
+/* 顶部透明时垫一层竖向渐变。本版首页是深底的目录页，白字本来就看得见，
+   但画面顶部有内容（几张卡的标题），纯靠对比度不够稳，垫一层渐隐的深色
+   保证导航在哪张截图上都读得出来。 */
+.nav::before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(19,19,19,.78),rgba(19,19,19,0));
+  transition:opacity .3s;
+}
+.nav.is-solid::before,
+.nav.is-open::before{opacity:0}
+.nav.is-solid,
+.nav.is-open{
+  /* 这里原来是 backdrop-filter:blur(16px)。毛玻璃在滚动时每帧都要重新
+     采样背后的画面，弱显卡（Windows 核显）上很贵，是滚动卡顿的常见来源。
+     改成不透明的深色底，观感几乎一样，代价是零。 */
+  background:rgba(19,19,19,.95);
+  border-bottom-color:rgba(255,255,255,.08);
+}
+.nav.is-hidden{transform:translateY(-100%)}
+.nav.is-open{transform:none}
+
+.nav__brand{
+  display:flex;align-items:center;gap:9px;
+  color:#fff;text-decoration:none;
+  font-weight:700;font-size:15px;letter-spacing:.02em;white-space:nowrap;
+}
+.nav__dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--violet);
+  box-shadow:0 0 0 4px rgba(114,63,255,.22);
+}
+.nav__brand-sub{font-weight:400;opacity:.5;font-size:13px}
+
+.nav__links{display:flex;gap:3px;margin-left:auto}
+.nav__links a{
+  color:rgba(255,255,255,.66);text-decoration:none;
+  font-size:13.5px;padding:7px 11px;border-radius:8px;
+  white-space:nowrap;transition:color .2s,background .2s;
+}
+.nav__links a:hover{color:#fff;background:rgba(255,255,255,.08)}
+.nav__links a.is-active{color:#fff;background:rgba(114,63,255,.24)}
+.nav__links-contact{display:none}
+
+.nav__cta{
+  margin-left:6px;padding:8px 16px;border-radius:999px;
+  background:var(--violet);color:#fff;text-decoration:none;
+  font-size:13.5px;font-weight:600;white-space:nowrap;
+  box-shadow:0 4px 18px rgba(114,63,255,.4);
+  transition:background .2s,transform .2s;
+}
+.nav__cta:hover{background:var(--violet-hi);transform:translateY(-1px)}
+
+.nav__burger{
+  display:none;width:38px;height:38px;margin-left:auto;
+  border:0;background:transparent;cursor:pointer;padding:0;
+  flex-direction:column;justify-content:center;align-items:center;gap:6px;
+}
+.nav__burger span{
+  display:block;width:20px;height:2px;border-radius:2px;
+  background:#fff;transition:transform .25s var(--ease),opacity .2s;
+}
+.nav__burger[aria-expanded="true"] span:first-child{transform:translateY(4px) rotate(45deg)}
+.nav__burger[aria-expanded="true"] span:last-child{transform:translateY(-4px) rotate(-45deg)}
+
+/* ── 区块 ───────────────────────────────────────────────── */
+.sec{position:relative}
+.sec--paper{background:var(--paper)}
+.sec--ink{background:var(--ink)}
+
+/* ── 画面容器 ───────────────────────────────────────────── */
+.stage{
+  position:relative;
+  width:100%;max-width:1920px;
+  margin:0 auto;
+  /* 让子元素可以用 cqw 单位按画面宽度等比定位 */
+  container-type:inline-size;
+}
+.stage__img{display:block;width:100%;height:auto}
+
+/* ── 目录三张卡片的点击热区（按画面宽度等比定位）─────────
+   数值是从本版首页那张「目录- UI设计.png」逐行扫描面板色（#404040）量出来的
+   卡片真实边界，外面各放约 0.3% 让手指好点。**换目录页版式就要重新量。**
+
+   画面里的左右顺序是「02 可视化 / 01 APP设计 / 03 AI原型」，不是按编号排的，
+   所以 --2 在最左、--1 居中、--3 在最右。
+
+   热区互不重叠：--2 右边缘 33.7% 正好接上 --1 的左边缘，--1 右边缘 61.7%
+   和 --3 左边缘 62.1% 之间留 0.4%。
+
+   卡片 01 的下半部分被那块紫色「UI设计」标签盖住（y 60.4%~88.2%），
+   所以它的高度只到 60.3%，和视觉上看得见的卡片面板对齐 —— 否则鼠标悬停
+   时高亮框会比卡片本身长出一截。 */
+.toc-hit{
+  position:absolute;display:block;
+  border-radius:2.2cqw;
+  transition:background .25s,box-shadow .25s;
+}
+.toc-hit:hover{
+  background:rgba(114,63,255,.16);
+  box-shadow:inset 0 0 0 2px rgba(132,85,255,.9);
+}
+.toc-hit--1{left:33.7%;width:28.0%;top:6.5%; height:53.8%}  /* 居中 · 01 APP设计 */
+.toc-hit--2{left:18.2%;width:15.5%;top:8.0%; height:65.2%}  /* 最左 · 02 可视化设计 */
+.toc-hit--3{left:62.1%;width:15.7%;top:7.6%; height:65.2%}  /* 最右 · 03 AI 智能体原型 */
+
+/* ── 长图切片序列 ───────────────────────────────────────── */
+/* max-width 必须和上面 .stage 的一致。少了这一条，在 2560 / 4K 这类宽屏上
+   就会出现「目录页居中留黑边、下面的项目却铺满整屏」的错位；而且 main.js 的
+   sizes 写的是最大 1920px，浏览器只会取 1920 档，铺满 2560 等于把 1920 的图
+   拉大 33%，字会糊。 */
+.strip{max-width:1920px;margin:0 auto;font-size:0;line-height:0}
+.strip img{
+  display:block;width:100%;height:auto;
+  vertical-align:top;
+  /* 消除相邻切片之间可能出现的 1px 缝 */
+  margin-bottom:-1px;
+}
+
+/* ── 尾页联系区 ─────────────────────────────────────────── */
+.sec--end{padding-bottom:0}
+
+.contact{
+  max-width:760px;margin:0 auto;
+  padding:clamp(56px,9vw,110px) clamp(20px,5vw,40px) clamp(40px,6vw,72px);
+  text-align:center;
+}
+.contact__eyebrow{
+  margin:0 0 14px;font-size:11px;letter-spacing:.34em;
+  color:var(--violet);font-weight:700;
+}
+.contact__title{
+  margin:0 0 12px;
+  font-size:clamp(30px,5.2vw,46px);
+  font-weight:800;letter-spacing:-.02em;color:#0B0B0F;
+}
+.contact__lead{
+  margin:0 0 clamp(30px,4.5vw,46px);
+  font-size:clamp(14px,1.7vw,16px);color:#6B6B74;
+}
+
+.contact__rows{
+  display:flex;flex-direction:column;gap:10px;
+  text-align:left;
+}
+.contact__row{
+  display:flex;align-items:center;gap:16px;
+  padding:16px 22px;border-radius:16px;
+  background:#F4F3F7;text-decoration:none;
+  transition:background .24s var(--ease),transform .24s var(--ease),box-shadow .24s;
+}
+.contact__row:hover{
+  background:#fff;transform:translateY(-2px);
+  box-shadow:0 12px 34px rgba(20,12,60,.12);
+}
+.contact__k{
+  flex:0 0 auto;width:44px;
+  font-size:12px;font-weight:700;color:var(--violet);
+  letter-spacing:.08em;
+}
+.contact__v{
+  font-size:clamp(14.5px,1.9vw,17px);font-weight:600;color:#15151A;
+  word-break:break-all;
+}
+.contact__v i{font-style:normal;color:var(--violet);margin-left:6px}
+
+.foot{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:8px;
+  padding:26px 20px 34px;
+  font-size:12.5px;color:#9A9AA4;
+  border-top:1px solid #ECECF0;
+  max-width:760px;margin:0 auto;
+}
+.foot__sep{opacity:.5}
+
+/* ── 回到顶部 ───────────────────────────────────────────── */
+.totop{
+  position:fixed;right:clamp(10px,1.6vw,22px);bottom:26px;
+  width:44px;height:44px;border-radius:50%;border:0;
+  background:var(--violet);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 26px rgba(114,63,255,.44);
+  opacity:0;pointer-events:none;transform:translateY(10px);
+  transition:opacity .3s var(--ease),transform .3s var(--ease),background .2s;
+  z-index:46;
+}
+.totop.is-on{opacity:1;pointer-events:auto;transform:none}
+.totop:hover{background:var(--violet-hi)}
+.totop svg{width:19px;height:19px}
+
+/* ── 全屏放大 ───────────────────────────────────────────── */
+.lbox{
+  position:fixed;inset:0;z-index:80;
+  background:rgba(8,8,10,.965);
+  display:flex;flex-direction:column;
+}
+.lbox[hidden]{display:none}
+
+.lbox__bar{
+  flex:0 0 auto;display:flex;align-items:center;gap:14px;
+  padding:11px clamp(12px,2vw,20px);
+  color:#fff;font-size:13px;
+  border-bottom:1px solid rgba(255,255,255,.09);
+}
+.lbox__label{font-weight:600;white-space:nowrap}
+.lbox__tip{color:rgba(255,255,255,.44);font-size:12px;margin-left:auto}
+.lbox__close{
+  width:34px;height:34px;flex:0 0 auto;border:0;border-radius:9px;
+  background:rgba(255,255,255,.1);color:#fff;cursor:pointer;
+  font-size:15px;line-height:1;transition:background .2s;
+}
+.lbox__close:hover{background:rgba(255,255,255,.2)}
+
+.lbox__viewport{
+  flex:1 1 auto;position:relative;overflow:hidden;
+  cursor:grab;touch-action:none;
+}
+.lbox__viewport.is-grabbing{cursor:grabbing}
+.lbox__img{
+  position:absolute;top:0;left:0;
+  max-width:none;max-height:none;
+  transform-origin:0 0;
+  will-change:transform;
+  user-select:none;-webkit-user-drag:none;
+}
+
+/* ── 移动端提示：点按放大 ───────────────────────────────── */
+.zoom-hint{
+  display:none;
+  position:fixed;left:50%;bottom:20px;transform:translateX(-50%);
+  z-index:44;
+  padding:8px 16px;border-radius:999px;
+  background:rgba(19,19,19,.94);color:#fff;font-size:12.5px;
+  border:1px solid rgba(255,255,255,.12);
+  transition:opacity .4s var(--ease);
+}
+
+/* ============================================================
+   响应式
+   ============================================================ */
+
+/* 中屏：导航收进菜单 */
+@media (max-width:1080px){
+  :root{--nav-h:54px}
+
+  .nav__burger{display:flex}
+  .nav__cta{display:none}
+
+  .nav__links{
+    position:fixed;top:var(--nav-h);left:0;right:0;
+    flex-direction:column;gap:2px;margin:0;padding:10px 12px 16px;
+    background:rgba(19,19,19,.985);
+    border-bottom:1px solid rgba(255,255,255,.08);
+    opacity:0;pointer-events:none;transform:translateY(-10px);
+    transition:opacity .24s var(--ease),transform .24s var(--ease);
+  }
+  .nav__links.is-open{opacity:1;pointer-events:auto;transform:none}
+  .nav__links a{padding:13px 14px;font-size:15px;border-radius:10px}
+  .nav__links-contact{
+    display:block;margin-top:6px;
+    background:var(--violet);text-align:center;font-weight:600;
+  }
+  .nav__links-contact:hover{background:var(--violet-hi)}
+}
+
+/* 窄屏：手机 */
+@media (max-width:700px){
+  /* 默认不显示；滚到第一个内容区时由 JS 亮出来，免得用户在封面就错过了 */
+  .zoom-hint{display:block;opacity:0}
+
+  /* 目录这张在手机上只有约 200px 高，三张卡片各剩不到 40px 宽，
+     按桌面那组百分比量出来的热区根本点不中。手机上改成把画面横向
+     大致三等分，每张卡各占一块 —— 落点会偏，但点得中比点得准重要。 */
+  .toc-hit{top:5%;height:72%}
+  .toc-hit--1{left:36%;width:25%}
+  .toc-hit--2{left:10%;width:25%}
+  .toc-hit--3{left:63%;width:25%}
+
+  .contact__row{padding:14px 16px;gap:12px}
+  .contact__k{width:38px}
+
+  .totop{bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+  .zoom-hint{bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+}
+
+/* 尊重「减少动态效果」偏好 */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+}
