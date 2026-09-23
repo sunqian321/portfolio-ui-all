@@ -232,14 +232,19 @@ python3 tools/build_tiles.py /path/to/另一个项目目录/
 | 删掉 `main.js` 第 5 节的「封面解锁」代码块 | `main.js` |
 | 联系区沿用纸白底（`sec--paper`）——时愈那张长图末尾就是一块白底，接上去没有分界线 | `style.css` |
 | **`.strip` 补了 `max-width:1920px; margin:0 auto`** | `style.css` |
+| **`og:image` / `og:url` 改成绝对网址**，并补上 `og:url` | `index.html` |
 | 切片逻辑从「一份 PDF 按页」改成「五张不同宽度的 PNG，逐张探测裁切线、逐张算母版宽度」 | `build_tiles.py` |
 
-> ⚠️ **`.strip` 那条 `max-width` 是别的版本没有的，属于 bug 修复。**
-> `.stage`（封面/目录）本来就 `max-width:1920px` 居中，但 `.strip` 没有，
-> 于是在 2560 / 4K 这类宽屏上会出现「目录页居中留黑边、下面的项目铺满整屏」的错位；
-> 而且 `main.js` 的 `sizes` 写的是最大 1920px，浏览器只取 1920 档，
-> 铺满 2560 等于把 1920 的图拉大 33%，字会糊。
-> **建议把这个修复同步到另外四个仓库。**
+> ⚠️ **上面两条标粗的是别的版本没有的，都属于 bug 修复，建议同步过去。**
+>
+> 1. **`.strip` 的 `max-width`**：`.stage`（封面/目录）本来就 `max-width:1920px` 居中，
+>    但 `.strip` 没有，于是在 2560 / 4K 这类宽屏上会出现「目录页居中留黑边、
+>    下面的项目铺满整屏」的错位；而且 `main.js` 的 `sizes` 写的是最大 1920px，
+>    浏览器只取 1920 档，铺满 2560 等于把 1920 的图拉大 33%，字会糊。
+> 2. **`og:image` 的绝对网址**：写 `assets/img/og-cover.jpg` 这种相对路径，
+>    微信 / 邮件客户端 / 招聘系统抓分享卡时**不会帮你补全**，结果是粘出去的链接
+>    没有预览图。必须写全 `https://sunqian321.github.io/<仓库名>/assets/img/og-cover.jpg`，
+>    顺便补一条 `og:url`。
 
 新增一版：
 
